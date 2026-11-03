@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface RolRepository extends JpaRepository<Rol, Long> {
     Optional<Rol> findByNombre(String nombre);
     List<Rol> findByActivo(boolean Activo);
+
+    Boolean existsByNombre(String nombre);
 }
