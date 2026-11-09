@@ -22,6 +22,11 @@ public interface IRolService {
     //Metodo para modificar un rol
     ObtenerRolResponse modificarRol(Long id, CrearModificarRolRequest modificarRolRequest) throws Exception;
 
-    // Metodo para eliminar un rol
-    void eliminarRol(Long id) throws Exception;
+    // Metodo para eliminar LOGICAMENTE un rol (la fila se conserva, solo se marca activo = false).
+    // Lanza RolNoEncontradoException (404) si no existe y RolYaInactivoException (409) si ya estaba inactivo.
+    void eliminarRolLogico(Long id);
+
+    // Metodo para eliminar FISICAMENTE un rol (DELETE real en la base de datos).
+    // Lanza RolNoEncontradoException (404) si no existe y RolEnUsoException (409) si tiene usuarios asignados.
+    void eliminarRol(Long id);
 }

@@ -1,10 +1,7 @@
 package co.edu.usbcali.autosusbcali.controller;
 
-import co.edu.usbcali.autosusbcali.domain.Rol;
 import co.edu.usbcali.autosusbcali.dto.request.CrearModificarRolRequest;
 import co.edu.usbcali.autosusbcali.dto.response.ObtenerRolResponse;
-import co.edu.usbcali.autosusbcali.mapper.RolMapper;
-import co.edu.usbcali.autosusbcali.repository.RolRepository;
 import co.edu.usbcali.autosusbcali.service.IRolService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/roles")
@@ -35,25 +31,17 @@ public class RolController {
         return rolService.buscarRolPorEstado(false);
     }
 
+    // Si el rol no existe, el servicio lanza RolNoEncontradoException y GlobalExceptionHandler responde 404.
     @GetMapping("/por-nombre/{nombre}")
     public ResponseEntity<ObtenerRolResponse> obtenerPorNombre(@PathVariable String nombre) {
-        ObtenerRolResponse rolResponse = rolService.obtenerRolPorNombre(nombre);
-        if (rolResponse != null) {
-
-            return new ResponseEntity<>(rolResponse, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(rolService.obtenerRolPorNombre(nombre));
     }
 
     @GetMapping("/por-id/{id}")
     public ResponseEntity<ObtenerRolResponse> obtenerPorId(@PathVariable Long id) {
-        ObtenerRolResponse rolResponse = rolService.obtenerRolPorId(id);
-        if (rolResponse != null) {
-
-            return new ResponseEntity<>(rolResponse, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(rolService.obtenerRolPorId(id));
     }
+
     @PostMapping("/guardar")
     public ResponseEntity<ObtenerRolResponse> crearRol(
             @RequestBody CrearModificarRolRequest crearRolRequest) throws Exception {
@@ -74,10 +62,20 @@ public class RolController {
         );
     }
 
+    // Eliminación LÓGICA: la fila se conserva con activo = false.
+    // 204 No Content -> se desactivó | 404 -> no existe | 409 -> ya estaba inactivo
+    @DeleteMapping("/eliminar-logico/{id}")
+    public ResponseEntity<Void> eliminarRolLogico(@PathVariable Long id) {
+        rolService.eliminarRolLogico(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Eliminación física.
+    // 204 No Content -> se eliminó | 404 -> no existe | 409 -> el rol está asignado a usuarios
     @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<Void> eliminarRol(@PathVariable Long id) throws Exception {
+    public ResponseEntity<Void> eliminarRol(@PathVariable Long id) {
         rolService.eliminarRol(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
 
